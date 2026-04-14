@@ -1,93 +1,95 @@
-# 🚀 Turbofan RUL Prediction using CMAPSS
+# Turbofan RUL Prediction using CMAPSS
 
-This project predicts **Remaining Useful Life (RUL)** for turbofan engines using the NASA CMAPSS dataset. It provides an end-to-end pipeline including:
+This project predicts **Remaining Useful Life (RUL)** for turbofan engines using the NASA CMAPSS dataset. It provides an end-to-end machine learning workflow covering exploratory analysis, preprocessing, feature engineering, model development, evaluation, artifact saving, and a local Flask-based web app for inference.
 
-* Exploratory Data Analysis (EDA)
-* Condition-aware preprocessing
-* Feature engineering
-* Classical regression models
-* Deep learning with LSTM
-
-The goal is to compare traditional ML models with sequence-based deep learning approaches for predictive maintenance.
+The project compares traditional regression models with sequence-based deep learning for predictive maintenance.
 
 ---
 
-## 📌 Project Overview
+## Project Overview
 
-The objective is to estimate **how many operational cycles remain before engine failure**, using:
+The objective is to estimate **how many operational cycles remain before engine failure** using:
 
-* Operational settings
-* Multivariate sensor readings
+- operational settings
+- multivariate sensor readings
 
-### ✔️ Key Components
+The project includes:
 
-* Exploratory analysis of engine degradation patterns
-* Operating condition identification using **KMeans**
-* Condition-wise normalization of sensors
-* Feature engineering and dataset merging
-* Model training and evaluation
-* Backtesting with **GroupKFold** (avoids data leakage)
-* Final evaluation on official test sets
-* Saving trained models and outputs
-
----
-
-## 🧠 Models Implemented
-
-* **Linear Regression**
-* **Random Forest Regressor**
-* **LSTM Regressor (PyTorch)**
+- exploratory data analysis of engine degradation patterns
+- operating condition identification using **KMeans**
+- condition-wise normalization of sensor values
+- feature engineering and combined dataset creation
+- model training and evaluation
+- grouped backtesting using **GroupKFold** to avoid leakage
+- final evaluation on official CMAPSS test sets
+- saving trained models, metadata, and result summaries
+- a Flask-based web app that serves trained models locally
 
 ---
 
-## ⚙️ Modeling Design
+## Models Implemented
 
-| Feature             | Value                       |
-| ------------------- | --------------------------- |
-| Dataset             | NASA CMAPSS (FD001–FD004)   |
-| Target              | Remaining Useful Life (RUL) |
-| Sequence Length     | 30                          |
-| Features            | 22                          |
-| LSTM Input Shape    | `(samples, 30, 22)`         |
-| Validation Strategy | GroupKFold (by `unit_id`)   |
-| Test Strategy       | Last window per engine      |
+- **Linear Regression**
+- **Random Forest Regressor**
+- **LSTM Regressor (PyTorch)**
 
 ---
 
-## 📊 Results Summary
+## Modeling Design
 
-### 🔁 Backtesting Results
-
-| Model             | MAE       | RMSE      | R²         |
-| ----------------- | --------- | --------- | ---------- |
-| Linear Regression | 34.88     | 47.87     | 0.6190     |
-| Random Forest     | 29.97     | 44.43     | 0.6718     |
-| LSTM              | **29.21** | **43.13** | **0.6907** |
-
----
-
-### 🧪 Official Test Results
-
-| Model             | MAE       | RMSE      | R²         |
-| ----------------- | --------- | --------- | ---------- |
-| Linear Regression | 27.25     | 34.19     | 0.5518     |
-| Random Forest     | **22.99** | **31.83** | **0.6115** |
-| LSTM              | 24.50     | 34.03     | 0.5562     |
+| Feature | Value |
+|---|---|
+| Dataset | NASA CMAPSS (`FD001` to `FD004`) |
+| Target | Remaining Useful Life (RUL) |
+| Sequence Length | `30` |
+| Final Feature Count | `22` |
+| LSTM Input Shape | `(samples, 30, 22)` |
+| LR/RF Input Shape | `(samples, 660)` |
+| Validation Strategy | `GroupKFold` grouped by `unit_id` |
+| Test Strategy | Last window per engine |
 
 ---
 
-### 🔍 Observations
+## Results Summary
 
-* LSTM performs best during **grouped backtesting**
-* Random Forest generalizes better on the **official test set**
-* LSTM captures temporal dependencies effectively
+### Backtesting Results
+
+| Model | MAE | RMSE | R² |
+|---|---:|---:|---:|
+| Linear Regression | 34.88 | 47.87 | 0.6190 |
+| Random Forest | 29.97 | 44.43 | 0.6718 |
+| LSTM | **29.21** | **43.13** | **0.6907** |
+
+### Official Test Results
+
+| Model | MAE | RMSE | R² |
+|---|---:|---:|---:|
+| Linear Regression | 27.25 | 34.19 | 0.5518 |
+| Random Forest | **22.99** | **31.83** | **0.6115** |
+| LSTM | 24.50 | 34.03 | 0.5562 |
+
+### Observations
+
+- **LSTM performs best during grouped backtesting**
+- **Random Forest performs best on the official combined test set**
+- **LSTM captures temporal dependencies effectively through sequence modeling**
+- **Grouped validation was important to prevent engine-level leakage from sliding windows**
 
 ---
 
-## 📁 Repository Structure
+## Repository Structure
 
-```
-Project/
+```text
+CMAPSS_Foreasting/
+│
+├── backend/
+│   ├── app.py
+│   ├── model_loader.py
+│   ├── preprocessing.py
+│   ├── state.py
+│   ├── inference.py
+│   └── templates/
+│       └── index.html
 │
 ├── notebooks/
 │   ├── Turbofan.ipynb
@@ -102,84 +104,22 @@ Project/
 │   ├── train_combined.csv
 │   ├── test_combined.csv
 │   ├── test_rul_combined.csv
-│   └── combined_features.json
+│   ├── combined_features.json
+│   └── preprocessing_summary.json
 │
 ├── saved_models/
 │   ├── final_linear_regression.joblib
 │   ├── final_lstm_optimized.pth
-│   ├── final_lstm_optimized_metadata.*
-│   └── model_metadata.*
+│   ├── final_lstm_optimized_metadata.joblib
+│   ├── final_lstm_optimized_metadata.json
+│   ├── final_random_forest.joblib
+│   ├── model_metadata.joblib
+│   ├── model_metadata.json
+│   └── preprocessing_artifacts.joblib
 │
 ├── backtest_outputs/
 ├── final_test_outputs/
 │
 ├── requirements.txt
-└── Project_CMAPSS.pdf
-```
-
----
-
-## ⚠️ Model Files
-
-The trained model **`final_random_forest.joblib` (~1 GB)** is **not included** in this repository due to GitHub file size limitations.
-
-### 📥 Download Model
-
-👉 **[Add your model download link here]**
-
-### 📂 Placement
-
-After downloading, place it here:
-
-```
-saved_models/final_random_forest.joblib
-```
-
-### ▶️ Usage
-
-Ensure the file is present before running inference or evaluation scripts.
-
----
-
-## 🛠️ Installation
-
-```bash
-pip install -r requirements.txt
-```
-
----
-
-## ▶️ Running the Project
-
-1. Open notebooks:
-
-   * `Turbofan.ipynb`
-   * `Turbofan_forecasting.ipynb`
-
-2. Run cells sequentially for:
-
-   * preprocessing
-   * training
-   * evaluation
-
----
-
-## 📚 Dataset
-
-* NASA CMAPSS Turbofan Engine Dataset
-* Includes FD001–FD004 subsets with varying operating conditions and fault modes
-
----
-
-## 📌 Key Highlights
-
-* Handles **multi-condition environments**
-* Avoids leakage using **GroupKFold**
-* Combines classical ML + deep learning
-* Structured and reproducible pipeline
-
----
-
-## 📎 License
-
-This project is for academic and research purposes.
+├── README.md
+└── .gitignore
