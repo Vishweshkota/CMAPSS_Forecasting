@@ -1,3 +1,6 @@
+# Web app
+flask
+
 # Core data and plotting
 numpy
 pandas
@@ -7,6 +10,9 @@ seaborn
 # Machine learning
 scikit-learn
 joblib
+
+# Deep learning
+torch
 
 # Notebook support
 jupyterlab
