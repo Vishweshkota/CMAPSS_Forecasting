@@ -1,0 +1,214 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>CMAPSS RUL Predictor</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            max-width: 1000px;
+            margin: 30px auto;
+            padding: 20px;
+            background: #f7f9fc;
+            color: #222;
+        }
+
+        h1 {
+            text-align: center;
+            margin-bottom: 10px;
+        }
+
+        p {
+            text-align: center;
+            color: #555;
+        }
+
+        form {
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-top: 20px;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 15px;
+        }
+
+        .field {
+            display: flex;
+            flex-direction: column;
+        }
+
+        label {
+            font-weight: 600;
+            margin-bottom: 5px;
+        }
+
+        input, select, button {
+            padding: 10px;
+            border: 1px solid #ccc;
+            border-radius: 6px;
+            font-size: 14px;
+        }
+
+        button {
+            margin-top: 20px;
+            background: #1f6feb;
+            color: white;
+            border: none;
+            cursor: pointer;
+        }
+
+        button:hover {
+            background: #1557b0;
+        }
+
+        .result-box {
+            margin-top: 20px;
+            background: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            white-space: pre-wrap;
+        }
+    </style>
+</head>
+<body>
+    <h1>CMAPSS Turbofan RUL Predictor</h1>
+    <p>Send one raw sensor row at a time and receive a Remaining Useful Life prediction when 30 cycles are available.</p>
+
+    <form id="predictForm">
+        <div class="grid">
+            <div class="field">
+                <label for="model">Model</label>
+                <select id="model" name="model">
+                    <option value="lr">Linear Regression</option>
+                    <option value="rf">Random Forest</option>
+                    <option value="lstm">LSTM</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="tag">Dataset Tag</label>
+                <select id="tag" name="tag">
+                    <option value="FD001">FD001</option>
+                    <option value="FD002">FD002</option>
+                    <option value="FD003">FD003</option>
+                    <option value="FD004">FD004</option>
+                </select>
+            </div>
+
+            <div class="field">
+                <label for="engine_id">Engine ID</label>
+                <input type="number" id="engine_id" name="engine_id" value="1" required>
+            </div>
+
+            <div class="field">
+                <label for="time_cycles">Time Cycles</label>
+                <input type="number" id="time_cycles" name="time_cycles" value="1" required>
+            </div>
+
+            <div class="field">
+                <label for="setting_1">Setting 1</label>
+                <input type="number" step="any" id="setting_1" name="setting_1" value="0.0" required>
+            </div>
+
+            <div class="field">
+                <label for="setting_2">Setting 2</label>
+                <input type="number" step="any" id="setting_2" name="setting_2" value="0.0" required>
+            </div>
+
+            <div class="field">
+                <label for="setting_3">Setting 3</label>
+                <input type="number" step="any" id="setting_3" name="setting_3" value="100.0" required>
+            </div>
+
+            <div class="field"><label for="sensor_1">Sensor 1</label><input type="number" step="any" id="sensor_1" value="518.67" required></div>
+            <div class="field"><label for="sensor_2">Sensor 2</label><input type="number" step="any" id="sensor_2" value="641.82" required></div>
+            <div class="field"><label for="sensor_3">Sensor 3</label><input type="number" step="any" id="sensor_3" value="1589.70" required></div>
+            <div class="field"><label for="sensor_4">Sensor 4</label><input type="number" step="any" id="sensor_4" value="1400.60" required></div>
+            <div class="field"><label for="sensor_5">Sensor 5</label><input type="number" step="any" id="sensor_5" value="14.62" required></div>
+            <div class="field"><label for="sensor_6">Sensor 6</label><input type="number" step="any" id="sensor_6" value="21.61" required></div>
+            <div class="field"><label for="sensor_7">Sensor 7</label><input type="number" step="any" id="sensor_7" value="554.36" required></div>
+            <div class="field"><label for="sensor_8">Sensor 8</label><input type="number" step="any" id="sensor_8" value="2388.06" required></div>
+            <div class="field"><label for="sensor_9">Sensor 9</label><input type="number" step="any" id="sensor_9" value="9046.19" required></div>
+            <div class="field"><label for="sensor_10">Sensor 10</label><input type="number" step="any" id="sensor_10" value="1.30" required></div>
+            <div class="field"><label for="sensor_11">Sensor 11</label><input type="number" step="any" id="sensor_11" value="47.47" required></div>
+            <div class="field"><label for="sensor_12">Sensor 12</label><input type="number" step="any" id="sensor_12" value="521.66" required></div>
+            <div class="field"><label for="sensor_13">Sensor 13</label><input type="number" step="any" id="sensor_13" value="2388.02" required></div>
+            <div class="field"><label for="sensor_14">Sensor 14</label><input type="number" step="any" id="sensor_14" value="8138.62" required></div>
+            <div class="field"><label for="sensor_15">Sensor 15</label><input type="number" step="any" id="sensor_15" value="8.4195" required></div>
+            <div class="field"><label for="sensor_16">Sensor 16</label><input type="number" step="any" id="sensor_16" value="0.03" required></div>
+            <div class="field"><label for="sensor_17">Sensor 17</label><input type="number" step="any" id="sensor_17" value="392.0" required></div>
+            <div class="field"><label for="sensor_18">Sensor 18</label><input type="number" step="any" id="sensor_18" value="2388.0" required></div>
+            <div class="field"><label for="sensor_19">Sensor 19</label><input type="number" step="any" id="sensor_19" value="100.0" required></div>
+            <div class="field"><label for="sensor_20">Sensor 20</label><input type="number" step="any" id="sensor_20" value="39.06" required></div>
+            <div class="field"><label for="sensor_21">Sensor 21</label><input type="number" step="any" id="sensor_21" value="23.4190" required></div>
+        </div>
+
+        <button type="submit">Send Sensor Row</button>
+    </form>
+
+    <div class="result-box" id="resultBox">Response will appear here...</div>
+
+    <script>
+        const form = document.getElementById("predictForm");
+        const resultBox = document.getElementById("resultBox");
+
+        // Send one raw row to the Flask streaming endpoint.
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const payload = {
+                model: document.getElementById("model").value,
+                tag: document.getElementById("tag").value,
+                engine_id: Number(document.getElementById("engine_id").value),
+                time_cycles: Number(document.getElementById("time_cycles").value),
+                setting_1: Number(document.getElementById("setting_1").value),
+                setting_2: Number(document.getElementById("setting_2").value),
+                setting_3: Number(document.getElementById("setting_3").value),
+                sensor_1: Number(document.getElementById("sensor_1").value),
+                sensor_2: Number(document.getElementById("sensor_2").value),
+                sensor_3: Number(document.getElementById("sensor_3").value),
+                sensor_4: Number(document.getElementById("sensor_4").value),
+                sensor_5: Number(document.getElementById("sensor_5").value),
+                sensor_6: Number(document.getElementById("sensor_6").value),
+                sensor_7: Number(document.getElementById("sensor_7").value),
+                sensor_8: Number(document.getElementById("sensor_8").value),
+                sensor_9: Number(document.getElementById("sensor_9").value),
+                sensor_10: Number(document.getElementById("sensor_10").value),
+                sensor_11: Number(document.getElementById("sensor_11").value),
+                sensor_12: Number(document.getElementById("sensor_12").value),
+                sensor_13: Number(document.getElementById("sensor_13").value),
+                sensor_14: Number(document.getElementById("sensor_14").value),
+                sensor_15: Number(document.getElementById("sensor_15").value),
+                sensor_16: Number(document.getElementById("sensor_16").value),
+                sensor_17: Number(document.getElementById("sensor_17").value),
+                sensor_18: Number(document.getElementById("sensor_18").value),
+                sensor_19: Number(document.getElementById("sensor_19").value),
+                sensor_20: Number(document.getElementById("sensor_20").value),
+                sensor_21: Number(document.getElementById("sensor_21").value)
+            };
+
+            try {
+                const response = await fetch("/predict/stream", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                resultBox.textContent = JSON.stringify(result, null, 2);
+            } catch (error) {
+                resultBox.textContent = "Error: " + error.message;
+            }
+        });
+    </script>
+</body>
+</html>
