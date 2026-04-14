@@ -1,8 +1,8 @@
 # Turbofan RUL Prediction using CMAPSS
 
-This project predicts **Remaining Useful Life (RUL)** for turbofan engines using the NASA CMAPSS dataset. It provides an end-to-end machine learning workflow covering exploratory analysis, preprocessing, feature engineering, model development, evaluation, artifact saving, and a local Flask-based web app for inference.
+This project predicts **Remaining Useful Life (RUL)** for turbofan engines using the NASA CMAPSS dataset. It includes an end-to-end workflow covering exploratory data analysis, condition-aware preprocessing, feature engineering, forecasting with classical machine learning models, sequence modeling with LSTM, and a local Flask-based web application for inference.
 
-The project compares traditional regression models with sequence-based deep learning for predictive maintenance.
+The goal is to compare traditional regression approaches with sequence-based deep learning for predictive maintenance.
 
 ---
 
@@ -15,15 +15,15 @@ The objective is to estimate **how many operational cycles remain before engine 
 
 The project includes:
 
-- exploratory data analysis of engine degradation patterns
-- operating condition identification using **KMeans**
-- condition-wise normalization of sensor values
+- exploratory analysis of engine degradation behavior
+- operating-condition identification using **KMeans**
+- condition-wise normalization of sensors
 - feature engineering and combined dataset creation
 - model training and evaluation
-- grouped backtesting using **GroupKFold** to avoid leakage
+- grouped backtesting with **GroupKFold** to avoid leakage
 - final evaluation on official CMAPSS test sets
-- saving trained models, metadata, and result summaries
-- a Flask-based web app that serves trained models locally
+- saving trained models and preprocessing artifacts
+- serving predictions through a Flask-based local web app
 
 ---
 
@@ -45,8 +45,8 @@ The project includes:
 | Final Feature Count | `22` |
 | LSTM Input Shape | `(samples, 30, 22)` |
 | LR/RF Input Shape | `(samples, 660)` |
-| Validation Strategy | `GroupKFold` grouped by `unit_id` |
-| Test Strategy | Last window per engine |
+| Validation Strategy | `GroupKFold` by `unit_id` |
+| Test Strategy | last window per engine |
 
 ---
 
@@ -70,9 +70,9 @@ The project includes:
 
 ### Observations
 
-- **LSTM performs best during grouped backtesting**
-- **Random Forest performs best on the official combined test set**
-- **LSTM captures temporal dependencies effectively through sequence modeling**
+- **LSTM performed best during grouped backtesting**
+- **Random Forest generalized best on the official combined test set**
+- **LSTM captured temporal patterns effectively through sequence modeling**
 - **Grouped validation was important to prevent engine-level leakage from sliding windows**
 
 ---
