@@ -7,7 +7,7 @@
     <style>
         body {
             font-family: Arial, sans-serif;
-            max-width: 1000px;
+            max-width: 1100px;
             margin: 30px auto;
             padding: 20px;
             background: #f7f9fc;
@@ -24,7 +24,7 @@
             color: #555;
         }
 
-        form {
+        form, .panel {
             background: white;
             padding: 20px;
             border-radius: 10px;
@@ -55,8 +55,13 @@
             font-size: 14px;
         }
 
-        button {
+        .button-row {
+            display: flex;
+            gap: 10px;
             margin-top: 20px;
+        }
+
+        button {
             background: #1f6feb;
             color: white;
             border: none;
@@ -67,25 +72,62 @@
             background: #1557b0;
         }
 
+        .secondary-btn {
+            background: #6c757d;
+        }
+
+        .secondary-btn:hover {
+            background: #545b62;
+        }
+
         .result-box {
-            margin-top: 20px;
-            background: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.08);
+            margin-top: 15px;
+            background: #f3f6fb;
+            padding: 15px;
+            border-radius: 8px;
             white-space: pre-wrap;
+            font-family: Consolas, monospace;
+        }
+
+        .status {
+            margin-top: 15px;
+            padding: 12px;
+            border-radius: 8px;
+            font-weight: 600;
+        }
+
+        .status.waiting {
+            background: #fff3cd;
+            color: #856404;
+        }
+
+        .status.ready {
+            background: #d4edda;
+            color: #155724;
+        }
+
+        .status.error {
+            background: #f8d7da;
+            color: #721c24;
+        }
+
+        .prediction {
+            font-size: 22px;
+            font-weight: bold;
+            margin-top: 10px;
+            color: #155724;
         }
     </style>
 </head>
 <body>
     <h1>CMAPSS Turbofan RUL Predictor</h1>
-    <p>Send one raw sensor row at a time and receive a Remaining Useful Life prediction when 30 cycles are available.</p>
+    <p>Send one raw sensor row at a time and receive a Remaining Useful Life prediction once 30 cycles are available.</p>
 
     <form id="predictForm">
         <div class="grid">
             <div class="field">
                 <label for="model">Model</label>
-                <select id="model" name="model">
+                <select id="model">
                     <option value="lr">Linear Regression</option>
                     <option value="rf">Random Forest</option>
                     <option value="lstm">LSTM</option>
@@ -94,7 +136,7 @@
 
             <div class="field">
                 <label for="tag">Dataset Tag</label>
-                <select id="tag" name="tag">
+                <select id="tag">
                     <option value="FD001">FD001</option>
                     <option value="FD002">FD002</option>
                     <option value="FD003">FD003</option>
@@ -104,27 +146,27 @@
 
             <div class="field">
                 <label for="engine_id">Engine ID</label>
-                <input type="number" id="engine_id" name="engine_id" value="1" required>
+                <input type="number" id="engine_id" value="1" required>
             </div>
 
             <div class="field">
                 <label for="time_cycles">Time Cycles</label>
-                <input type="number" id="time_cycles" name="time_cycles" value="1" required>
+                <input type="number" id="time_cycles" value="1" required>
             </div>
 
             <div class="field">
                 <label for="setting_1">Setting 1</label>
-                <input type="number" step="any" id="setting_1" name="setting_1" value="0.0" required>
+                <input type="number" step="any" id="setting_1" value="0.0" required>
             </div>
 
             <div class="field">
                 <label for="setting_2">Setting 2</label>
-                <input type="number" step="any" id="setting_2" name="setting_2" value="0.0" required>
+                <input type="number" step="any" id="setting_2" value="0.0" required>
             </div>
 
             <div class="field">
                 <label for="setting_3">Setting 3</label>
-                <input type="number" step="any" id="setting_3" name="setting_3" value="100.0" required>
+                <input type="number" step="any" id="setting_3" value="100.0" required>
             </div>
 
             <div class="field"><label for="sensor_1">Sensor 1</label><input type="number" step="any" id="sensor_1" value="518.67" required></div>
@@ -150,20 +192,32 @@
             <div class="field"><label for="sensor_21">Sensor 21</label><input type="number" step="any" id="sensor_21" value="23.4190" required></div>
         </div>
 
-        <button type="submit">Send Sensor Row</button>
+        <div class="button-row">
+            <button type="submit">Send Sensor Row</button>
+            <button type="button" class="secondary-btn" id="resetEngineBtn">Reset Engine</button>
+            <button type="button" class="secondary-btn" id="resetAllBtn">Reset All</button>
+        </div>
     </form>
 
-    <div class="result-box" id="resultBox">Response will appear here...</div>
+    <div class="panel">
+        <h3>Prediction Status</h3>
+        <div id="statusBox" class="status waiting">No request sent yet.</div>
+        <div id="predictionBox" class="prediction"></div>
+
+        <h3>Raw Response</h3>
+        <div class="result-box" id="resultBox">Response will appear here...</div>
+    </div>
 
     <script>
         const form = document.getElementById("predictForm");
         const resultBox = document.getElementById("resultBox");
+        const statusBox = document.getElementById("statusBox");
+        const predictionBox = document.getElementById("predictionBox");
+        const resetEngineBtn = document.getElementById("resetEngineBtn");
+        const resetAllBtn = document.getElementById("resetAllBtn");
 
-        // Send one raw row to the Flask streaming endpoint.
-        form.addEventListener("submit", async function (event) {
-            event.preventDefault();
-
-            const payload = {
+        function buildPayload() {
+            return {
                 model: document.getElementById("model").value,
                 tag: document.getElementById("tag").value,
                 engine_id: Number(document.getElementById("engine_id").value),
@@ -193,6 +247,31 @@
                 sensor_20: Number(document.getElementById("sensor_20").value),
                 sensor_21: Number(document.getElementById("sensor_21").value)
             };
+        }
+
+        function updateUI(result) {
+            resultBox.textContent = JSON.stringify(result, null, 2);
+
+            if (result.ok && result.window_ready) {
+                statusBox.className = "status ready";
+                statusBox.textContent = `Prediction ready for Engine ${result.engine_id} (${result.tag})`;
+                predictionBox.textContent = `Predicted RUL: ${result.predicted_rul.toFixed(2)}`;
+            } else if (result.ok && !result.window_ready) {
+                statusBox.className = "status waiting";
+                statusBox.textContent = `Cycles collected: ${result.cycles_collected}. ${result.message}`;
+                predictionBox.textContent = "";
+            } else {
+                statusBox.className = "status error";
+                statusBox.textContent = result.error || "Request failed";
+                predictionBox.textContent = "";
+            }
+        }
+
+        // Submit one sensor row and automatically advance to the next cycle.
+        form.addEventListener("submit", async function (event) {
+            event.preventDefault();
+
+            const payload = buildPayload();
 
             try {
                 const response = await fetch("/predict/stream", {
@@ -204,9 +283,57 @@
                 });
 
                 const result = await response.json();
-                resultBox.textContent = JSON.stringify(result, null, 2);
+                updateUI(result);
+
+                if (result.ok) {
+                    const cycleInput = document.getElementById("time_cycles");
+                    cycleInput.value = Number(cycleInput.value) + 1;
+                }
             } catch (error) {
-                resultBox.textContent = "Error: " + error.message;
+                updateUI({ ok: false, error: error.message });
+            }
+        });
+
+        // Reset the currently selected engine state.
+        resetEngineBtn.addEventListener("click", async function () {
+            const payload = {
+                tag: document.getElementById("tag").value,
+                engine_id: Number(document.getElementById("engine_id").value)
+            };
+
+            try {
+                const response = await fetch("/engines/reset", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify(payload)
+                });
+
+                const result = await response.json();
+                updateUI(result);
+                document.getElementById("time_cycles").value = 1;
+            } catch (error) {
+                updateUI({ ok: false, error: error.message });
+            }
+        });
+
+        // Reset all engine states currently stored in backend memory.
+        resetAllBtn.addEventListener("click", async function () {
+            try {
+                const response = await fetch("/engines/reset_all", {
+                    method: "POST",
+                    headers: {
+                        "Content-Type": "application/json"
+                    },
+                    body: JSON.stringify({})
+                });
+
+                const result = await response.json();
+                updateUI(result);
+                document.getElementById("time_cycles").value = 1;
+            } catch (error) {
+                updateUI({ ok: false, error: error.message });
             }
         });
     </script>
