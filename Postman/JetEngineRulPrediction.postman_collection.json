@@ -1,0 +1,144 @@
+{
+  "info": {
+    "_postman_id": "1fadd1d5-fe9c-4982-a4f2-75c47019372c",
+    "name": "JetEngineRulPrediction",
+    "schema": "https://schema.getpostman.com/json/collection/v2.1.0/collection.json",
+    "_exporter_id": "40270115"
+  },
+  "item": [
+    {
+      "name": "Health",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/health",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "health"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Models",
+      "request": {
+        "method": "GET",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/models",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "models"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Predict",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "url": {
+          "raw": "{{base_url}}/predict/file",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "predict",
+            "file"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Reset_all",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"ok\": true,\r\n  \"message\": \"Reset all engine states\"\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/engines/reset_all",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "engines",
+            "reset_all"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Stream",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"model\": \"lr\",\r\n  \"tag\": \"FD001\",\r\n  \"engine_id\": 1,\r\n  \"time_cycles\": 1,\r\n  \"setting_1\": 0.0,\r\n  \"setting_2\": 0.0,\r\n  \"setting_3\": 100.0,\r\n  \"sensor_1\": 518.67,\r\n  \"sensor_2\": 641.82,\r\n  \"sensor_3\": 1589.70,\r\n  \"sensor_4\": 1400.60,\r\n  \"sensor_5\": 14.62,\r\n  \"sensor_6\": 21.61,\r\n  \"sensor_7\": 554.36,\r\n  \"sensor_8\": 2388.06,\r\n  \"sensor_9\": 9046.19,\r\n  \"sensor_10\": 1.30,\r\n  \"sensor_11\": 47.47,\r\n  \"sensor_12\": 521.66,\r\n  \"sensor_13\": 2388.02,\r\n  \"sensor_14\": 8138.62,\r\n  \"sensor_15\": 8.4195,\r\n  \"sensor_16\": 0.03,\r\n  \"sensor_17\": 392.0,\r\n  \"sensor_18\": 2388.0,\r\n  \"sensor_19\": 100.0,\r\n  \"sensor_20\": 39.06,\r\n  \"sensor_21\": 23.4190\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/predict/stream",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "predict",
+            "stream"
+          ]
+        }
+      },
+      "response": []
+    },
+    {
+      "name": "Streamall",
+      "request": {
+        "method": "POST",
+        "header": [],
+        "body": {
+          "mode": "raw",
+          "raw": "{\r\n  \"model\": \"lr\",\r\n  \"tag\": \"FD001\",\r\n  \"engine_id\": 1,\r\n  \"time_cycles\": 1,\r\n  \"setting_1\": 0.0,\r\n  \"setting_2\": 0.0,\r\n  \"setting_3\": 100.0,\r\n  \"sensor_1\": 518.67,\r\n  \"sensor_2\": 641.82,\r\n  \"sensor_3\": 1589.70,\r\n  \"sensor_4\": 1400.60,\r\n  \"sensor_5\": 14.62,\r\n  \"sensor_6\": 21.61,\r\n  \"sensor_7\": 554.36,\r\n  \"sensor_8\": 2388.06,\r\n  \"sensor_9\": 9046.19,\r\n  \"sensor_10\": 1.30,\r\n  \"sensor_11\": 47.47,\r\n  \"sensor_12\": 521.66,\r\n  \"sensor_13\": 2388.02,\r\n  \"sensor_14\": 8138.62,\r\n  \"sensor_15\": 8.4195,\r\n  \"sensor_16\": 0.03,\r\n  \"sensor_17\": 392.0,\r\n  \"sensor_18\": 2388.0,\r\n  \"sensor_19\": 100.0,\r\n  \"sensor_20\": 39.06,\r\n  \"sensor_21\": 23.4190\r\n}",
+          "options": {
+            "raw": {
+              "language": "json"
+            }
+          }
+        },
+        "url": {
+          "raw": "{{base_url}}/predict/stream/all",
+          "host": [
+            "{{base_url}}"
+          ],
+          "path": [
+            "predict",
+            "stream",
+            "all"
+          ]
+        }
+      },
+      "response": []
+    }
+  ]
+}
